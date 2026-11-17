@@ -7,10 +7,10 @@ This class is used by the [command palette](/guide/command_palette) to match sea
 
 from __future__ import annotations
 
+from collections.abc import Iterable, Sequence
 from functools import lru_cache
 from operator import itemgetter
 from re import finditer
-from typing import Iterable, Sequence
 
 import rich.repr
 
@@ -51,7 +51,7 @@ class FuzzySearch:
             A pair of (score, tuple of offsets). `(0, ())` for no result.
         """
 
-        cache_key = (query, candidate)
+        cache_key = (query, candidate, self.case_sensitive)
         if cache_key in self.cache:
             return self.cache[cache_key]
         default: tuple[float, Sequence[int]] = (0.0, [])
@@ -172,7 +172,7 @@ class Matcher:
         self._query = query
         self._match_style = Style(reverse=True) if match_style is None else match_style
         self._case_sensitive = case_sensitive
-        self.fuzzy_search = FuzzySearch()
+        self.fuzzy_search = FuzzySearch(case_sensitive=case_sensitive)
 
     @property
     def query(self) -> str:
