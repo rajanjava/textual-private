@@ -8,7 +8,7 @@
 
 ---
 
-## 2. Root Cause Analysis
+## 2. Problem Description & Root Cause Analysis
 1. In `Matcher.__init__`:
    ```python
    self._case_sensitive = case_sensitive
@@ -49,6 +49,11 @@ FAILED tests/test_fuzzy.py::test_fuzzy_search_cache_case_sensitive - assert 16.0
 ```
 
 ---
+
+## Solution Approach
+1. **Trace Flag Propagation & Caching:** Investigated why `Matcher(query, case_sensitive=True)` still returned case-insensitive matches: the `case_sensitive` flag was not propagated through all internal matching helpers and was missing from the LRU cache key, causing cached case-insensitive results to be returned for case-sensitive queries.
+2. **Propagate Flag and Isolate Cache Keys:** Passed `case_sensitive` consistently through regex/scoring helpers and included it in the cache key so case-sensitive and case-insensitive evaluations remain completely isolated.
+3. **TDD & Regression Safety:** Added `test_matcher_case_sensitive` in `tests/test_fuzzy.py` verifying strict case matching alongside cached case-insensitive calls.
 
 ## 4. Implementation Diff
 ```diff
